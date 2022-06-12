@@ -1,0 +1,32 @@
+Intro
+
+Here is the small application.
+
+- it just exposes one endpoint /user/:id
+- it expects integer user id
+- it returns the user
+
+Task 1
+
+- Describe all steps needed for safe migration response type User(id, name) to User(Int id, String firstName, String lastName)
+	First of all, we have to work with "String lastName". We are adding it to the constructor with "User" type. And after that we are doing all the modifications where "User(id, name)" is user and 	trying to make it work with the following constructor "User(Int id, String firstName, String lastName)"
+
+- Suppose the current version of this artifact is 1.5
+- How would you bring versioning to the API?
+- What is the next version if artifact should be?
+	I would change it right to the 2.0, because after compiling we will get some errors, because our signature has been changed, and we will have to fix all these errors.
+
+Task 2
+
+- Describe all steps needed for safe migration response type User(id, name) to User(Int id, String name, List<String> skills)
+	First of all we will have to add "List<String>" to our User constructor, and find all usages of "User" and replace them with "User(Int id, String firstName, List<String> skills)". This should 	fix a possible problems.
+- Suppose the current version of this artifact is 1.5
+- How would you bring versioning to the API?
+- What is the next version if artifact should be?
+	The same thing as we in the first task, here we will get compilation errors that we will have to fix, and because of that I would change it to 2.0. But it can be completely different depending 	on organization and their goals!
+
+
+Definition of done
+
+- All steps should be described in plain english
+- All meaningful things like versioning, urls, User data types need to be specified

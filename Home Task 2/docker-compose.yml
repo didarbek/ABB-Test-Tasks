@@ -1,0 +1,40 @@
+# Specifying the version
+version: '3.9'
+
+# Creating all the services we need to work with Flask and PostgreSQL
+services:
+  web:
+    # Naming container and image
+    container_name: web
+    image: web
+    build: .
+    # Exposing the ports
+    ports:
+      - "80:80"
+    environment:
+      # Creating environment variable
+      - DATABASE_URL=abbDB://abbUser:abbPassword@db:5432/postgres
+    # NOTE
+    # It means that starting 'web' container will depend on 'db' container
+    depends_on:
+      - db
+
+  db:
+    # Naming container
+    container_name: db
+    # Getting the latest postgres image
+    image: postgres:latest
+    # Exposing the ports
+    ports:
+      - "5432:5432"
+    # Writing down posrgres data (database name, username, password)
+    environment:
+      - POSTGRES_PASSWORD=abbPassword
+      - POSTGRES_USER=abbUser
+      - POSTGRES_DB=abbDB
+    # Defining inner and outer volumes
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+volumes:
+  pgdata: {}
