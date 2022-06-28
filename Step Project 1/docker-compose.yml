@@ -1,6 +1,6 @@
 version: '3.8'
 
-# defining two services: web (Flask application) and db (Postgresql database)
+# defining two services: web (Flask application) and db (Postgresql database) for development usage
 services:
   web:
     build: ./web

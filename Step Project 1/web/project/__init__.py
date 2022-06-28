@@ -1,6 +1,6 @@
 from flask import (Flask, request, jsonify,
                    render_template, url_for, flash,
-                   redirect, abort)
+                   redirect, abort, Response)
 from flask_sqlalchemy import SQLAlchemy
 from urllib.parse import urlparse
 
@@ -111,24 +111,24 @@ def user_delete(user_id):
     return jsonify({"user_id": user.id, "operation_type": "delete", "operation_status": "success"})
 
 
+# endpoint to show if application is running and connection with database is established
 @app.route('/status', methods=['GET'])
 def status():
     try:
         result = db.engine.execute('SELECT 1')
         if result:
-            return jsonify({"status": "OK"})
+            return jsonify({"status": "OK"}), 200
     except Exception as e:
         app.logger.exception(e)
 
-    return jsonify({"status": "Error"})
+    return jsonify({"status": "Error"}), 500
 
 
-# creating feature to list all users for frontend
+# creating feature to list all users in frontend
 # it just renders a template and passes our context parameters (users=users)
 @app.route('/')
 def index():
     users = Users.query.all()
 
     return render_template('index.html', users=users, hostname=urlparse(request.base_url).hostname)
-
 
