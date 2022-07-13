@@ -1,0 +1,107 @@
+1. What is the pod? What is the difference between a pod and container?
+
+The pod is the smallest execution unit in Kubernetes. A pod encapsulates one or more applications. If one pod fails, Kubernetes can automatically create a new replica of that pod to continue operations. Pods include one or more containers (such as Docker containers).
+
+Talking about containers we should note that a container is at the lowest level in the hierarchy. In short, containers are packages of applications or services bundled together with their execution environment. And at the same time we should get that Kubernetes pods are collections of containers that share the same resources and local network. This enables communication between containers in a pod.
+
+
+2. What are the features of Kubernetes?
+
+Kubernetes is a container orchestration tool able to simplify the management of containers and, simultaniously, to make it more efficient. The main aim of Kubernetes, as the other orchestration systems, is to simplify the work of technical teams, by automating many processes of applications and services deployment that before were carried out manually. Let's look at some of the benefits that Kubernetes offers:
+
+	- Automates various manual processes
+	- Interacts with several groups of containers
+	- Provides additional services
+	- Self-monitoring
+	- Horizontal scaling
+	- Storage orchestration
+	- Automates rollouts and rollbacks
+	- Container balancing
+
+
+3. What are the main components of Kubernetes architecture?
+
+There are three main groups of components that Kubernetes consists of:
+
+	- Control Plane Components
+	- Node Components
+	- Addons
+
+Let's start with Control Plane Componenets. This kind of components make global decisions about the cluster, as well as detecting and responding to cluster events. Control plane components can be run on any machine in the cluster. It has the following components:
+	- kube-apiserver - The API server is a component of the Kubernetes control plane that exposes the Kubernetes API. 
+	- etcd - Consistent and highly-available key value store used as Kubernetes' backing store back up plan for those data.
+	- kube-scheduler - Control plane component that watches for newly created Pods with no assigned node, and selects a node for them to run on.
+	- kube-controller-manager - A Kubernetes control plane component that embeds cloud-specific control logic. The cloud controller manager lets you link your cluster into your cloud provider's API, and separates out the components that interact with that cloud platform from components that only interact with your cluster.
+
+Now let's check Node Components. Node components run on every node, maintaining running pods and providing the Kubetenetes runtime environment. It consists of the following technologies:
+	- kubelet is an agent that runs on each node in the cluster. It makes sure that containers are running in a Pod. The kubelet takes a set of PodSpecs that are provided through various mechanisms and ensures that the containers described in those PodSpecs are running and healthy. The kubelet doesn't manage containers which were not created by Kubernetes.
+	- kube-proxy is a network proxy that runs on each node in your cluster, implementing part of the Kubernetes Service concept.
+	- container runtime is the software that is responsible for running containers.
+
+And the last group of Kubernetes components is Addons. Let's see how they look like:
+	- DNS - While the other addons are not strictly required, all Kubernetes clusters should have cluster DNS, as many examples rely on it.
+	- Web UI (Dashboard) is a general purpose, web-based UI for Kubernetes clusters. It allows users to manage and troubleshoot applications running in the clusters, as well as the cluster itself.
+	- Container Resource Monitoring records generic time-series metrics about containers in a central databasem, and provides a UI for browsing that data.
+	- a cluster-level logging mechanism is responsible for saving container logs to a central log store with search/browsing interface.
+
+
+4. What is a Namespace in k8s? How to create it (2 ways)?
+
+Namespaces provide a mechanism for isolating groups of resources within a single cluster. Names of resources need to be unique within a namespace, but not across namespaces. Namespaces are intended for use in environments with many users spread across multiple teams, or projects. For clusters with a few to tens of users, you should not need to create or think about namespaces at all. Start using namespaces when you need the features they provide.
+
+Now let's see how we can create these namespaces in Kubernetes. There are two ways of creating a namespace: using kubectl and with YAML.
+
+	1) Creating namespace using kubectl. First of all we have to get the list of available namespaces in our environment. And to do so we use "kubectl get namespaces". To create a new namespace we use command "kubectl create namespace <name>". After that we just have to verify that we successfully created a new namespace and again we use "kubectl get namespaces". It is all it takes to create a namespace using kubectl)
+	2) To create a namespace with YAML file, we should create a YAML file and write the following text into it:
+
+		api Version: v1
+		kind: Namespace
+		metadata:
+		name: <name>
+
+		After that we just need to save the file and apply it to kubernetes using "kubectl apply -f file.yml"
+
+
+5. What are the different services within Kubernetes?
+
+There are the following services in Kubernetes:
+	- ClusterIP exposes a service which is only accessible from within the cluster.
+	- NodePort exposes a service via a static port on each node's IP.
+	- LoadBalancer exposes the service via the cloud provider's load balancer.
+	- ExternalName maps a service to a predefined externalName field by returning a value for the CNAME record.
+
+Let's dive deeper and review each of these services:
+	
+	1) Kubernetes ClusterIP Service. ClusterIP is the default type of service, which is used to expose a service on an IP address internal to the cluster. Access is only permitted from within the cluster.
+	2) Kubernetes Headless Service. Headless services can be defined with selectors, in which case endpoint records are created in the API that modify the DNS to return addresses that point to pods that are exposing the service.
+	3) Kubernetes NodePort Service. NodePorts are open ports on every cluster node. Kubernetes will route traffic that comes into a NodoPort to the service, even if the service is not running on that node. NodePort is intended as a foundation for other higher-level methods of ingress such as load balancers and are useful in development.
+	4) Kubernetes Load Balancer Service. LoadBalancer service provides an equivalent to a clusterIP service, extending it to an external load balancer that is specific to the cloud provider. Kubernetes will automatically create the load balancer, provide firewalls rules if needed, and populate the service with the external IP address assigned by the cloud provider.
+
+
+6. What is a Kubectl? How to see pod logs in real time?
+
+Kubectl is a command line tool for communicating with a Kubernetes cluster's control panel, using the Kubernetes API. For configuration, kubectl looks like a file named config in the $HOME/.kube directory. You can specify other kubeconfig file by setting the KUBECONFIG environment variable or by setting the --kubeconfig flag.
+
+Let's check how its syntax looks like:
+	
+	kubectl [command] [TYPE] [NAME] [flags]
+
+	where command, TYPE, NAME, and flags are:
+		- command: specifies the operation that you want to perform on one or more resources, for example create, get, describe, delete.
+		- TYPE: specifies the resource type. Resource type are case-intensive and you can specify the singular, plural, or abbreviated forms. For example, the following commands the same output:
+			kubectl get pod pod1
+			kubectl get pods pod1
+			kubectl get po pod1
+		- NAME: specifies the name of the resource. Names are case-intensive. If the name is omitted, details for all resources are displayed, for example kubectl get pods.
+		- flags: specifies optional flags. For example, you can use the -s or --server flags to specify the address and port of the Kubernetes.
+
+Just to get all the available logs we can use the following command:
+	
+	kubectl logs -f <pod-id>
+
+And to see the logs of pod in real time we can use this command:
+	
+	kubectl --tail <"number-of-lines"> logs <"pod-id">
+
+
+7) Done
