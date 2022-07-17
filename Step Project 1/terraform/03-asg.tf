@@ -42,6 +42,6 @@ resource "aws_autoscaling_policy" "back_end_scale_app" {
 			resource_label = format("%s/%s", aws_lb.pubic_alb.arn_suffix, aws_lb_target_group.back_end.arn_suffix)
 		}
 
-		target_value = 50
+		target_value = 30
 	}
 }
