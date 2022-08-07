@@ -18,16 +18,6 @@ pipeline {
                 echo "Git Checkout Completed!"
             }
         }
-        stage("Testing our application") {
-            steps {
-                dir("tests") {
-                    script {
-                        sh "python -m pytest tests.py"
-                        echo "Tests has been successfully passed"
-                    }
-                }
-            }
-        }
         stage("Login to DockerHub") {
 			steps {
 				sh "echo $DOCKERHUB_CREDENTIALS_PSW | docker login -u $DOCKERHUB_CREDENTIALS_USR --password-stdin"
@@ -53,6 +43,16 @@ pipeline {
                     script {
                         sh "kubectl apply -f front/deployment.yaml"
                         echo "k8s has been updated"
+                    }
+                }
+            }
+        }
+        stage("Testing our application") {
+            steps {
+                dir("tests") {
+                    script {
+                        sh "python -m pytest tests.py"
+                        echo "Tests has been successfully passed"
                     }
                 }
             }
