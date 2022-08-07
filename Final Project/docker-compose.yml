@@ -1,0 +1,45 @@
+version: '3.8'
+services:
+  jenkins:
+    image: jenkins/jenkins:lts-jdk11
+    privileged: true
+    user: root
+    ports:
+      - 8080:8080
+      - 50000:50000
+    links:
+      - jenkins_slave1
+    container_name: jenkins
+    hostname: jenkins
+    networks:
+      minikube:
+        ipv4_address: 192.168.49.4
+    volumes:
+      - "./data:/var/jenkins_home"
+      - /var/run/docker.sock:/var/run/docker.sock
+  jenkins_slave1:
+    image: jenkins/ssh-agent:docker-jdk11-1
+    privileged: true
+    user: root
+    environment:
+      - "JENKINS_AGENT_SSH_PUBKEY=ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIKemdSxBjFvw+cgh6fHVIRSMkzen7FLhLrONgo+Nxwtt vadymh@vadymh-laptop"
+    networks:
+      minikube:
+        ipv4_address: 192.168.49.5
+    volumes:
+      - "./kubectl-config:/home/jenkins/.kube"
+      - /var/run/docker.sock:/var/run/docker.sock
+
+  registry:
+    image: registry:2
+    environment:
+      - "REGISTRY_HTTP_ADDR=192.168.49.6:5006"
+    ports:
+      - 5006:5006
+    networks:
+      minikube:
+        ipv4_address: 192.168.49.6
+
+networks:
+  minikube:
+    external: true
