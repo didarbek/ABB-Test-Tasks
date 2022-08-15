@@ -7,7 +7,6 @@ pipeline {
     stages {
         stage("Git checkout") {
             steps {
-                deleteDir()
                 git branch: 'master',
                     url: 'https://github.com/didarbek/PhoneBook'
                 checkout([$class: 'GitSCM',
@@ -16,35 +15,6 @@ pipeline {
                           userRemoteConfigs: [[credentialsId: 'github', url: 'https://github.com/didarbek/PhoneBook']]
                           ])
                 echo "Git Checkout Completed!"
-            }
-        }
-        stage("Login to DockerHub") {
-			steps {
-				sh "echo $DOCKERHUB_CREDENTIALS_PSW | docker login -u $DOCKERHUB_CREDENTIALS_USR --password-stdin"
-                echo "Login to DockerHub Completed"
-			}
-		}
-        stage("Building our WEB docker image") {
-            steps {
-                sh "ls -lh"
-                sh "docker-compose -f docker-compose.prod.yml build"
-                echo "Image Build is Completed"
-            }
-        }
-        stage("Push to docker registry") {
-            steps {
-                sh "docker push 127.0.0.1:5000/abbphonebook:latest"
-                echo "Push to Docker Registry Completed"
-            }
-        }
-        stage("Update k8s deployment") {
-            steps {
-                dir("k8s") {
-                    script {
-                        sh "kubectl apply -f front/deployment.yaml"
-                        echo "k8s has been updated"
-                    }
-                }
             }
         }
         stage("Testing our application") {
@@ -57,9 +27,40 @@ pipeline {
                 }
             }
         }
+        stage("Login to DockerHub") {
+			steps {
+				sh "echo $DOCKERHUB_CREDENTIALS_PSW | docker login -u $DOCKERHUB_CREDENTIALS_USR --password-stdin"
+                echo "Login to DockerHub Completed"
+			}
+		}
+        stage("Building our WEB docker image") {
+            steps {
+                sh "ls -lh"
+                sh "docker-compose -f docker-compose.prod.yml --project-name 127.0.0.1:5000/abbphonebook:${BUILD_NUMBER} build"
+                echo "Image Build is Completed"
+            }
+        }
+        stage("Push to docker registry") {
+            steps {
+                sh "docker push 127.0.0.1:5000/abbphonebook:${BUILD_NUMBER}"
+                echo "Push to Docker Registry Completed"
+            }
+        }
+        stage("Update k8s deployment") {
+            steps {
+                dir("k8s") {
+                    script {
+                        sh """sed -i -e "/^\\s*image:\\s.*/s/abbphonebook:.*/abbphonebook:${BUILD_NUMBER}/g" front/deployment.yaml"""
+                        sh "kubectl apply -f front/deployment.yaml"
+                        echo "k8s has been updated"
+                    }
+                }
+            }
+        }
     }
     post {
         always {
+            deleteDir()
             sh(label: "Cleanup", script: """#!/bin/bash
                 docker logout
             """)
