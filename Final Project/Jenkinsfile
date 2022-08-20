@@ -7,6 +7,7 @@ pipeline {
     stages {
         stage("Git checkout") {
             steps {
+                deleteDir()
                 git branch: 'master',
                     url: 'https://github.com/didarbek/PhoneBook'
                 checkout([$class: 'GitSCM',
@@ -26,6 +27,18 @@ pipeline {
                     }
                 }
             }
+        }
+        stage('SonarQube') {
+             steps {
+                 dir('tests') {
+                    script {
+                        sh """
+                            sonar-scanner.bat -D"sonar.projectKey=sonarqube-flask" -D"sonar.sources=." -D"sonar.host.url=http://localhost:9000" -D"sonar.login=f2d32ebef8b3767dd9v4b14f4b24418cf284927g"
+                           """
+                        echo 'Sonarqube finished successfully'
+                        }
+                    }
+                 }
         }
         stage("Login to DockerHub") {
 			steps {
